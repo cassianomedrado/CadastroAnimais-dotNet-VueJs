@@ -1,0 +1,389 @@
+﻿<!DOCTYPE html>
+<html>
+    <body>
+        <head>
+            <!--Bootstrap-->
+            <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-Zenh87qX5JnK2Jl0vWa8Ck2rdkQ2Bzep5IDxbcnCeuOxjzrPF/et3URy9Bv1WTRi" crossorigin="anonymous">
+            
+            <!-- JavaScript Bundle with Popper -->
+            <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-OERcA2EqjJCMA+/3y+gxIOqMEjwtxJY7qPCqsdltbNJuaOe923+mo//f6V8Qbsw3" crossorigin="anonymous"></script>
+            
+            <!--Vue.js-->
+            <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.js"></script>
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/1.0.26/vue.min.js"></script>
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/vue-router/0.7.13/vue-router.min.js"> </script>
+    
+            <!--Axios-->
+            <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    
+            <!-- Font Awesome-->
+            <script src="https://kit.fontawesome.com/1f819c09e8.js" crossorigin="anonymous"></script>
+        </head>
+
+        <div class="container">
+            <header>
+                <div class="branding">
+                    <h3>Cadastro Animais</h3>
+                </div>
+            </header>
+
+            <main id="app">
+                <router-view></router-view>
+            </main>
+
+        </div>
+
+        <template id="animaisLista">
+            <p>Lista de Animais</p>
+
+            <div class="Action">
+                <div class="filter row">
+                    <div class="form-group col-sm-3">
+                        <input v-model="searchKey" class="form-control" placeholder="Procurar" id="search-element">
+                    </div>
+                </div>
+                <br>
+                <button type="button" class="btn btn-success" v-link="{path:'/adicionarAnimal'}">Adicionar</button>
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Nome</th>
+                            <th>Idade</th>
+                            <th>Raça</th>
+                            <th>Porte</th>
+                            <th>Tipo De Animal</th>
+                            <th>Característica</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-for="animal in animais | filterBy searchKey in 'nome'">
+                            <td>{{animal.Id}}</td>
+                            <td>{{animal.nome}}</td>
+                            <td>{{animal.idade}}</td>
+                            <td>{{animal.raca}}</td>
+                            <td>{{animal.porte}}</td>
+                            <td>{{animal.TipoAnimal}}</td>
+                            <td>{{animal.caracteristica}}</td>
+                            <td>
+                                <!-- <button type="button" class="btn btn-outline-info" v-link="{name: 'editar-fatura', params:{fatura_id:fatura.Id}}">Editar</button> -->
+                                <a class="btn btn-defaut" v-link="{name: 'alterar-animal', params:{animal_Id:animal.Id, animal_nome:animal.nome, animal_TipoAnimal:animal.TipoAnimal}}">
+                                    <i class="fa-solid fa-pen"></i>
+                                </a>
+                                <a class="btn btn-defaut" v-on:click="excluir(animal.Id,animal.nome,animal.TipoAnimal)">
+                                    <i class="fa-solid fa-trash-can"></i>
+                                </a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </template>
+
+        <template id="adicionarAnimal">
+            <p>Adicionar Animais</p>
+            <form @submit.prevent="addAnimal">
+                
+                <div class="form-group">
+                        <select v-model="selected" class="selectpicker" required>
+                            <option disabled value="">Tipo Animal</option>
+                            <option>Cachorro</option>
+                            <option>Gato</option>
+                          </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="nome">Nome</label><br>
+                    <input class="form-control" id="nome" type="text" v-model="nome" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="idade">Idade</label><br>
+                    <input class="form-control" id="idade" type="text" v-model="idade" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="raca">Raça</label><br>
+                    <input class="form-control" id="raca" type="text" v-model="raca" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="porte">Porte</label><br>
+                    <input class="form-control" id="porte" type="text" v-model="porte" required>
+                </div>
+
+                <div v-if="selected == 'Cachorro'" class="form-group">
+                    <label for="profissao">Profissão</label><br>
+                    <input class="form-control" id="profissao" type="text" v-model="profissao" required>
+                </div>
+
+                <div v-if="selected == 'Gato'" class="form-group">
+                    <label for="tipomiado">Tipo de Miado</label><br>
+                    <input class="form-control" id="tipomiado" type="text" v-model="tipomiado" required>
+                </div>
+                
+                <br>
+                <button type="submit" class="btn btn-primary" >Adicionar</button>
+                <br>
+                <br>
+                <button type="button" class="btn btn-danger" v-link="{path:'/'}">Voltar</button>
+            </form>
+        </template>
+
+        <template id="alterarAnimal">
+            <p>Adicionar Animais</p>
+            <form @submit.prevent="altAnimal">
+                
+                <div class="form-group">
+                        <select v-model="selected" class="selectpicker" disabled>
+                            <option disabled value="">Tipo Animal</option>
+                            <option>Cachorro</option>
+                            <option>Gato</option>
+                          </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="nome">Nome</label><br>
+                    <input class="form-control" id="nome" type="text" v-model="nome" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="idade">Idade</label><br>
+                    <input class="form-control" id="idade" type="text" v-model="idade" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="raca">Raça</label><br>
+                    <input class="form-control" id="raca" type="text" v-model="raca" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="porte">Porte</label><br>
+                    <input class="form-control" id="porte" type="text" v-model="porte" required>
+                </div>
+
+                <div v-if="selected == 'Cachorro'" class="form-group">
+                    <label for="profissao">Profissão</label><br>
+                    <input class="form-control" id="profissao" type="text" v-model="profissao" required>
+                </div>
+
+                <div v-if="selected == 'Gato'" class="form-group">
+                    <label for="tipomiado">Tipo de Miado</label><br>
+                    <input class="form-control" id="tipomiado" type="text" v-model="tipomiado" required>
+                </div>
+                
+                <br>
+                <button type="submit" class="btn btn-primary" >Alterar</button>
+                <br>
+                <br>
+                <button type="button" class="btn btn-danger" v-link="{path:'/'}">Voltar</button>
+            </form>
+        </template>
+
+        <script>
+            var animais = [];
+            var ListarAnimais = Vue.extend({
+                template: '#animaisLista',
+                data: function () {
+                    axios.get('https://localhost:44306/api/CadastroAnimais').then(res => {
+                        this.animais = (res.data)
+                });
+                    return { animais: animais, searchKey: '' }
+                },
+                methods:{
+                    excluir( idview, nomeview, tipoview){                   
+
+                        let obj = {
+                            Id: idview,
+                            nome: nomeview,
+                            tipo: tipoview 
+                        }
+                        const json = JSON.stringify(obj);
+
+                        if(confirm('Deseja excluir o animal?')){
+                            axios.delete('https://localhost:44306/api/CadastroAnimais', {
+                                headers: {
+                                    'Content-Type': 'application/json'
+                                },
+                                data: json 
+                            });
+                        }
+
+                        router.go('/')
+                    }
+                }
+            });
+
+            var AdicionarAnimal = Vue.extend({
+                template: "#adicionarAnimal",
+                data:function(){
+                   return{
+                    Id: 0,
+                    nome: "",
+                    idade: "",
+                    raca: "",
+                    porte: "",
+                    selected: "Cachorro",
+                    profissao: "",
+                    tipomiado: "",
+                    caracteristica: ""
+                   }
+                },
+                methods:{
+                    addAnimal(){
+                        selected = this.selected;
+
+                        if(selected === "Cachorro"){
+                            let obj = {
+                                Id: this.Id,
+                                nome: this.nome,
+                                idade: this.idade,
+                                raca: this.raca,
+                                porte: this.porte,
+                                TipoAnimal: selected,
+                                caracteristica: this.profissao
+                            }
+                            const json = JSON.stringify(obj);
+
+                            customConfig = {
+                                headers: {
+                                'Content-Type': 'application/json'
+                                }
+                            };
+                            axios.post('https://localhost:44306/api/CadastroAnimais', json, customConfig);
+                        }else{
+                            let obj = {
+                                Id: this.id,
+                                nome: this.nome,
+                                idade: this.idade,
+                                raca: this.raca,
+                                porte: this.porte,
+                                TipoAnimal: selected,
+                                caracteristica: this.tipomiado
+                            }
+                            const json = JSON.stringify(obj);
+
+                            customConfig = {
+                                headers: {
+                                'Content-Type': 'application/json'
+                                }
+                            };
+                            axios.post('https://localhost:44306/api/CadastroAnimais', json, customConfig);
+                        }
+                        router.go('/')
+                    }
+
+                }
+            });
+
+            var alteracaoAnimal = [];
+            var AlterarAnimal = Vue.extend({
+                template:'#alterarAnimal',
+                data: function(){
+                    axios.get('https://localhost:44306/api/CadastroAnimais?id='+ this.$route.params.animal_Id +'&nome='+this.$route.params.animal_nome+'&tipo='+this.$route.params.animal_TipoAnimal).then(resp =>{
+                        this.nomeantigo = resp.data[0].nome
+                        this.idantigo = resp.data[0].Id
+
+                        this.Id = resp.data[0].Id
+                        this.nome = resp.data[0].nome
+                        this.idade = resp.data[0].idade
+                        this.raca = resp.data[0].raca
+                        this.porte = resp.data[0].porte
+                        if(resp.data[0].TipoAnimal === 'Cachorro'){
+                            this.profissao = resp.data[0].caracteristica.substr(11)
+                        }else{
+                            this.tipomiado = resp.data[0].caracteristica.substr(15)
+                        }
+                        this.selected =  resp.data[0].TipoAnimal
+                    });
+                return{
+                    Id: 0,
+                    nome: "",
+                    idade: "",
+                    raca: "",
+                    porte: "",
+                    selected: "",
+                    profissao: "",
+                    tipomiado: "",
+                    caracteristica: "",
+                    alteracaoAnimal : alteracaoAnimal,
+                    nomeantigo: "",
+                    idantigo: ""
+                }
+            },
+                methods:{
+                    altAnimal(){
+                        selected = this.selected;
+
+                        if(selected === "Cachorro"){
+                            let obj = {
+                                Id: this.Id,
+                                nome: this.nome,
+                                idade: this.idade,
+                                raca: this.raca,
+                                porte: this.porte,
+                                TipoAnimal: selected,
+                                caracteristica: this.profissao,
+                                nomeantigo: this. nomeantigo,
+                                idantigo: this.idantigo
+                            }
+                            const json = JSON.stringify(obj);
+
+                            customConfig = {
+                                headers: {
+                                'Content-Type': 'application/json'
+                                }
+                            };
+                            axios.put('https://localhost:44306/api/CadastroAnimais', json, customConfig).then(resp => {
+                                router.go('/');
+                            });
+                        }else{
+                            let obj = {
+                                Id: this.id,
+                                nome: this.nome,
+                                idade: this.idade,
+                                raca: this.raca,
+                                porte: this.porte,
+                                TipoAnimal: selected,
+                                caracteristica: this.tipomiado,
+                                nomeantigo: this. nomeantigo,
+                                idantigo: this.idantigo
+                            }
+                            const json = JSON.stringify(obj);
+
+                            customConfig = {
+                                headers: {
+                                'Content-Type': 'application/json'
+                                }
+                            };
+                            axios.put('https://localhost:44306/api/CadastroAnimais', json, customConfig).then(resp => {
+                                router.go('/');
+                            });
+                        }
+                        
+                    // axios.put('https://localhost:44306/api/CadastroAnimais',{
+                    //     Id: this.faturaAlterar.Id,
+                    //     NumeroCartao: this.faturaAlterar.NumeroCartao,
+                    //     NumeroPedido: this.faturaAlterar.NumeroPedido,
+                    //     Valor: this.faturaAlterar.Valor,
+                    //     Status: this.faturaAlterar.Valor.Status
+                    // }).then(resp =>{
+                    //     router.go('/');
+                    // });
+                    }
+                }
+            });
+
+            var eventBus = new Vue();
+
+            var router = new VueRouter();
+            router.map({
+                '/': { component: ListarAnimais },
+                '/adicionarAnimal': { component: AdicionarAnimal },
+                '/alterarAnimal/:animal_Id/:animal_nome/:animal_TipoAnimal': { component: AlterarAnimal, name: 'alterar-animal'}
+            })
+            .start(Vue.extend({}), '#app')
+        </script>
+    </body>
+</html>
